@@ -1,1 +1,1 @@
-web: python3 -w http.server
+web: python -w http.server
