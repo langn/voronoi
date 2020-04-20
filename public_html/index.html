@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta charset="utf-8">
-<link href="base.css" rel="stylesheet" />
-<link href='https://api.tiles.mapbox.com/mapbox.js/v1.6.3/mapbox.css' rel='stylesheet' />
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <link href="base.css" rel="stylesheet" />
+  <link href='https://api.tiles.mapbox.com/mapbox.js/v1.6.3/mapbox.css' rel='stylesheet' />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
+
 <body>
   <div id='map'>
   </div>
@@ -27,13 +29,14 @@
   <script src="voronoi_map.js"></script>
   <script>
     L.mapbox.accessToken = 'pk.eyJ1IjoibGFuZ24iLCJhIjoiY2s4b3JxbXp1MGp1czNkbzQzNXI4MnZtbCJ9.B6ff0Opj4uCjRMR476ls0A';
-    map = 
+    map =
       L.mapbox.map('map', 'zetter.i73ka9hn')
-      .setView([42.34, -71.058], 14);
+        .setView([42.34, -71.058], 14);
 
-    url = 'blue-bikes.csv';
-    initialSelection = d3.set(['Tesco', 'Sainsburys']);
+    url = 'data.csv';
+    initialSelection = d3.set();
     voronoiMap(map, url, initialSelection);
   </script>
 </body>
+
 </html>
