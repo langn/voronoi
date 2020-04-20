@@ -1,27 +1,18 @@
-showHide = function(selector) {
-  d3.select(selector).select('.hide').on('click', function(){
-    d3.select(selector)
-      .classed('visible', false)
-      .classed('hidden', true);
-  });
+/*
+ * Generates a Voronoi Map using Mapbox, Leaflet, and D3.
+ * Author: Nate Lang, inspiration from Chris Zetter
+*/
 
-  d3.select(selector).select('.show').on('click', function(){
-    d3.select(selector)
-      .classed('visible', true)
-      .classed('hidden', false);
-  });
-}
-
-voronoiMap = function(map, url, initialSelections) {
+voronoiMap = (map, url, initialSelections) => {
   const pointTypes = d3.map();
   let pointSet = [];
   let lastPoint;
 
   let voronoi = d3.geom.voronoi()
-      .x(pt => { return pt.x; })
-      .y(pt => { return pt.y; });
+    .x(pt => { return pt.x; })
+    .y(pt => { return pt.y; });
 
-  const selectPoint = function() {
+  const selectPoint = function () {
     d3.selectAll('.selected').classed('selected', false);
 
     let cell = d3.select(this);
@@ -33,9 +24,9 @@ voronoiMap = function(map, url, initialSelections) {
     d3.select('#selected h1')
       .html('')
       .append('a')
-        .text(point.name)
-        .attr('href', point.url)
-        .attr('target', '_blank')
+      .text(point.name)
+      .attr('href', point.url)
+      .attr('target', '_blank')
   }
 
   const drawPointTypeSelection = () => {
@@ -46,73 +37,71 @@ voronoiMap = function(map, url, initialSelections) {
 
     checkboxOptions.append("input")
       .attr('type', 'checkbox')
-      .property('checked', function(d) {
+      .property('checked', function (d) {
         return initialSelections === undefined || initialSelections.has(d.type)
       })
-      .attr("value", function(d) { return d.type; })
+      .attr("value", function (d) { return d.type; })
       .on("change", drawWithLoading);
 
     checkboxOptions.append("span")
       .attr('class', 'key')
-      .style('background-color', function(d) { return '#' + d.color; });
+      .style('background-color', function (d) { return '#' + d.color; });
 
     checkboxOptions.append("span")
-      .text(function(d) { return d.type; });
+      .text(function (d) { return d.type; });
   }
 
   const selectedTypes = () => {
     return d3
       .selectAll('#toggles input[type=checkbox]')[0]
-      .filter(el => {return el.checked})
-      .map(el => {return el.value});
+      .filter(el => el.checked)
+      .map(el => el.value);
   }
 
   const pointsFilteredToSelectedTypes = () => {
     let currentSelectedTypes = d3.set(selectedTypes());
-    return pointSet.filter(item => {
-      return currentSelectedTypes.has(item.type);
-    });
+    return pointSet.filter(point => currentSelectedTypes.has(point.type));
   }
 
-  var drawWithLoading = function(e){
+  const drawWithLoading = e => {
     d3.select('#loading').classed('visible', true);
     if (e && e.type == 'viewreset') {
       d3.select('#overlay').remove();
     }
-    setTimeout(function(){
+    setTimeout(function () {
       draw();
       d3.select('#loading').classed('visible', false);
     }, 0);
   }
 
-  var draw = function() {
+  const draw = () => {
     d3.select('#overlay').remove();
 
-    var bounds = map.getBounds(),
-        topLeft = map.latLngToLayerPoint(bounds.getNorthWest()),
-        bottomRight = map.latLngToLayerPoint(bounds.getSouthEast()),
-        existing = d3.set(),
-        drawLimit = bounds.pad(0.4);
+    let bounds = map.getBounds();
+    let topLeft = map.latLngToLayerPoint(bounds.getNorthWest());
+    let bottomRight = map.latLngToLayerPoint(bounds.getSouthEast());
+    let existing = d3.set();
+    let drawLimit = bounds.pad(0.4);
 
-    filteredPoints = pointsFilteredToSelectedTypes().filter(function(d) {
-      var latlng = new L.LatLng(d.latitude, d.longitude);
+    filteredPoints = pointsFilteredToSelectedTypes().filter(data => {
+      let latlng = new L.LatLng(data.latitude, data.longitude);
 
       if (!drawLimit.contains(latlng)) { return false };
 
-      var point = map.latLngToLayerPoint(latlng);
+      let point = map.latLngToLayerPoint(latlng);
 
       key = point.toString();
       if (existing.has(key)) { return false };
       existing.add(key);
 
-      d.x = point.x;
-      d.y = point.y;
+      data.x = point.x;
+      data.y = point.y;
       return true;
     });
 
-    voronoi(filteredPoints).forEach(function(d) { d.point.cell = d; });
+    voronoi(filteredPoints).forEach(data => data.point.cell = data);
 
-    var svg = d3.select(map.getPanes().overlayPane).append("svg")
+    let svg = d3.select(map.getPanes().overlayPane).append("svg")
       .attr('id', 'overlay')
       .attr("class", "leaflet-zoom-hide")
       .style("width", map.getSize().x + 'px')
@@ -120,33 +109,33 @@ voronoiMap = function(map, url, initialSelections) {
       .style("margin-left", topLeft.x + "px")
       .style("margin-top", topLeft.y + "px");
 
-    var g = svg.append("g")
+    let g = svg.append("g")
       .attr("transform", "translate(" + (-topLeft.x) + "," + (-topLeft.y) + ")");
 
-    var svgPoints = g.attr("class", "points")
+    let svgPoints = g.attr("class", "points")
       .selectAll("g")
-        .data(filteredPoints)
+      .data(filteredPoints)
       .enter().append("g")
-        .attr("class", "point");
+      .attr("class", "point");
 
-    var buildPathFromPoint = function(point) {
-      return "M" + point.cell.join("L") + "Z";
+    let buildPathFromPoint = pt => {
+      return "M" + pt.cell.join("L") + "Z";
     }
 
     svgPoints.append("path")
       .attr("class", "point-cell")
       .attr("d", buildPathFromPoint)
       .on('click', selectPoint)
-      .classed("selected", function(d) { return lastPoint == d} );
+      .classed("selected", d => lastPoint == d);
 
     svgPoints.append("circle")
-      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-      .style('fill', function(d) { return '#' + d.color } )
-      .attr("r", 2);
+      .attr("transform", d => "translate(" + d.x + "," + d.y + ")")
+      .style('fill', d => '#' + d.color)
+      .attr("r", 4);
   }
 
-  var mapLayer = {
-    onAdd: function(map) {
+  let mapLayer = {
+    onAdd: function (map) {
       map.on('viewreset moveend', drawWithLoading);
       drawWithLoading();
     }
@@ -154,14 +143,28 @@ voronoiMap = function(map, url, initialSelections) {
 
   showHide('#about');
 
-  map.on('ready', function() {
-    d3.csv(url, function(csv) {
+  map.on('ready', function () {
+    d3.csv(url, function (csv) {
       pointSet = csv;
-      pointSet.forEach(function(point) {
-        pointTypes.set(point.type, {type: point.type, color: point.color});
+      pointSet.forEach(function (point) {
+        pointTypes.set(point.type, { type: point.type, color: point.color });
       })
       drawPointTypeSelection();
       map.addLayer(mapLayer);
     })
+  });
+}
+
+const showHide = (selector) => {
+  d3.select(selector).select('.hide').on('click', function () {
+    d3.select(selector)
+      .classed('visible', false)
+      .classed('hidden', true);
+  });
+
+  d3.select(selector).select('.show').on('click', function () {
+    d3.select(selector)
+      .classed('visible', true)
+      .classed('hidden', false);
   });
 }
