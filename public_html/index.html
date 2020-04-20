@@ -22,7 +22,7 @@
   <div id='loading'>
   </div>
   <div id='selected'>
-    <h1>Select a region to display its name</h1>
+    <h1>Explore the isolation of locations from public services in Boston</h1>
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.8/d3.min.js"></script>
   <script src="https://api.tiles.mapbox.com/mapbox.js/v2.2.1/mapbox.js"></script>
@@ -34,7 +34,7 @@
         .setView([42.34, -71.058], 14);
 
     url = 'data.csv';
-    initialSelection = d3.set();
+    initialSelection = d3.set(['Blue Bike']);
     voronoiMap(map, url, initialSelection);
   </script>
 </body>
