@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="base.css" rel="stylesheet" />
+<link href='https://api.tiles.mapbox.com/mapbox.js/v1.6.3/mapbox.css' rel='stylesheet' />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  <div id='map'>
+  </div>
+  <div id='selections' class="selections">
+    <a href='#' class="show">Choose which dataset to display</a>
+    <div class='content'>
+      <a href='#' class="hide">Hide</a>
+      <div id="toggles">
+      </div>
+    </div>
+  </div>
+  <div id='loading'>
+  </div>
+  <div id='selected'>
+    <h1>Explore the isolation of locations from public services in Boston</h1>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.8/d3.min.js"></script>
+  <script src="https://api.tiles.mapbox.com/mapbox.js/v2.2.1/mapbox.js"></script>
+  <script src="voronoi_map.js"></script>
+  <script>
+    L.mapbox.accessToken = 'pk.eyJ1IjoibGFuZ24iLCJhIjoiY2s4b3JxbXp1MGp1czNkbzQzNXI4MnZtbCJ9.B6ff0Opj4uCjRMR476ls0A';
+    map = 
+      L.mapbox.map('map', 'zetter.i73ka9hn')
+      .setView([42.34, -71.058], 14);
+
+    url = 'blue-bikes.csv';
+    initialSelection = d3.set(['Tesco', 'Sainsburys']);
+    voronoiMap(map, url, initialSelection);
+  </script>
+</body>
+</html>
